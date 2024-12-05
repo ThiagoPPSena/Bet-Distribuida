@@ -1,0 +1,1 @@
+// TEORICAMENTE gerenciar a carteira do apostador
