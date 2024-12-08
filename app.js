@@ -9,6 +9,18 @@ const fastify = Fastify({ logger: false });
 // Configuração do Web3
 const web3 = new Web3("http://127.0.0.1:7545"); // URL do Ganache
 
+
+// Função para pegar o endereço das contas
+async function getAccounts() {
+    // Pega as contas no Ganache
+    const accounts = await web3.eth.getAccounts();
+    
+    console.log('Endereços das contas no Ganache:');
+    accounts.forEach((account, index) => {
+        console.log(`${index + 1}: ${account}`);
+    });
+}
+
 // ABI e endereço do contrato
 const contractJSON = require("./build/contracts/Storage.json");
 const contractABI = contractJSON.abi;
