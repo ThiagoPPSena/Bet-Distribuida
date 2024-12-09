@@ -35,7 +35,7 @@ contract Betting is EventManager {
     // Função de distribuição de valores após finalização do evento
     function resolveBets(uint256 _eventId) public {
         Event storage eventDetails = events[_eventId];
-        require(eventDetails.closed, "Evento ainda nao encerrado");
+        require(events[_eventId].closed, "Evento ainda nao encerrado");
 
         // Pegar o resultado do evento
         uint256 winningChoice = eventDetails.result;
