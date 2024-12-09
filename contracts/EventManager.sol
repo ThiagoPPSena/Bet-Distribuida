@@ -50,8 +50,15 @@ contract EventManager {
         uint256 totalPool = eventDetails.totalFor + eventDetails.totalAgainst;
         uint256 winningPool = (winningChoice == 1) ? eventDetails.totalFor : eventDetails.totalAgainst;
 
-        // Verifica se winningPool é zero para evitar divisão por zero
-        require(winningPool > 0, "Divisao por zero");
+        // Pega o criador do evento pelo event id
+        address creatorEvent = getEventCreator(_eventId);
+        
+        // Caso não haja apostas na escolha vencedora
+        if (winningPool == 0) {
+            // Transfere todo o saldo do evento ao criador
+            payable(creatorEvent).transfer(totalPool);
+            return; // Finaliza a execução
+        }
 
         uint256 creatorCommission = (totalPool * COMMISSION) / 100;
         uint256 rewardPool = totalPool - creatorCommission;
@@ -61,9 +68,6 @@ contract EventManager {
 
         // Multiplique antes de dividir para manter a precisão
         uint256 rewardPerUnit = (rewardPool * PRECISION) / winningPool;
-
-        // Pega o criador do evento pelo event id
-        address creatorEvent = getEventCreator(_eventId);
 
         // Paga o criador do evento a comissão
         payable(creatorEvent).transfer(creatorCommission);

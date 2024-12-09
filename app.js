@@ -23,7 +23,7 @@ async function getAccounts() {
 const contractEventJSON = require("./build/contracts/EventManager.json");
 const contractEventABI = contractEventJSON.abi;
 
-const contractAddressEvent = "0xfD3388F3Cb1945C0B3f2C5a4aeCcAC200B96d38D";
+const contractAddressEvent = "0x2d7d15f622a672F86A1cc7BcCCA01Cd78Bd49B1D";
 
 const EventManager = new web3.eth.Contract(
   contractEventABI,
