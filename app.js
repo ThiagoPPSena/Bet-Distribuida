@@ -23,84 +23,100 @@ async function getAccounts() {
 const contractEventJSON = require("./build/contracts/EventManager.json");
 const contractEventABI = contractEventJSON.abi;
 
-const contractBetJSON = require("./build/contracts/Betting.json");
-const contractBetABI = contractBetJSON.abi;
-
-const contractAddressEvent = "0x07345B99EaB6b95ba071697702cd92B92c386f44";
-const contractAddressBetting = "0x28BA45A6EbC5064d85a907AC491b6a5Ce96B1b5D";
+const contractAddressEvent = "0xfD3388F3Cb1945C0B3f2C5a4aeCcAC200B96d38D";
 
 const EventManager = new web3.eth.Contract(
   contractEventABI,
   contractAddressEvent
 );
-const Betting = new web3.eth.Contract(contractBetABI, contractAddressBetting);
 
 // Endpoint para definir um valor
 fastify.post("/criarevento", async (request, reply) => {
+  // Pega os valores do corpo da requisição
+  const { name, endTimestamp } = request.body;
+  // Estima o gas
+  const gasEstimate = await EventManager.methods
+    .createEvent(name, endTimestamp)
+    .estimateGas();
+  const adjustedGasEstimate = Math.floor(Number(gasEstimate) * 1.5);
+  // Pega as contas no Ganache
   const accounts = await web3.eth.getAccounts(); // Contas do Ganache
 
   try {
-    const receipt = await Betting.methods
-      .createEvent("Teste de evento")
-      .send({ from: accounts[0], gas: 300000 });
-    reply.send({ status: "success", transaction: receipt.transactionHash });
+    const receipt = await EventManager.methods
+      .createEvent(name, endTimestamp)
+      .send({ from: accounts[0], gas: adjustedGasEstimate });
+
+    reply.status(200).send({
+      message: "Evento criado com sucesso",
+      transaction: receipt.transactionHash,
+    });
   } catch (error) {
     reply.status(500).send(error.toString());
   }
 });
 
 fastify.post("/apostar", async (request, reply) => {
+  // Pega os valores do corpo da requisição
+  const { eventId, choice, value, accountIndex } = request.body;
+
+  // Pega as contas no Ganache
   const accounts = await web3.eth.getAccounts(); // Contas do Ganache
   try {
-    const receipt = await Betting.methods.placeBet(1, 1).send({
-      from: accounts[0],
-      gas: 300000,
-      value: web3.utils.toWei("0.1", "ether"),
+    const receipt = await EventManager.methods.placeBet(eventId, choice).send({
+      from: accounts[accountIndex],
+      gas: "1299999",
+      value: web3.utils.toWei(value, "ether"),
     });
 
-    reply.send({ status: "sucess", transaction: receipt.transactionHash });
+    reply.status(200).send({
+      message: "Aposta feita com sucesso",
+      transaction: receipt.transactionHash,
+    });
   } catch (error) {
+    console.log(error);
     reply.status(500).send(error.toString());
   }
 });
 
 fastify.post("/encerrarevento", async (request, reply) => {
+  // Pega os valores do corpo da requisição
+  const { eventId, accountIndex } = request.body;
+  // Pega as contas no Ganache
   const accounts = await web3.eth.getAccounts(); // Contas do Ganache
   try {
-    const receipt = await Betting.methods.closeEvent(1, 1).send({
-      from: accounts[0],
-      gas: 300000,
+    const receipt = await EventManager.methods.closeEvent(eventId).send({
+      from: accounts[accountIndex],
+      gas: "1299999",
     });
 
-    reply.send({ status: "sucess", transaction: receipt.transactionHash });
+    reply.status(200).send({
+      message: "Evento encerrado com sucesso!",
+      transaction: receipt.transactionHash,
+    });
   } catch (error) {
     console.log(error);
     reply.status(500).send(error.toString());
   }
 });
 
-fastify.post("/redistribuir", async (request, reply) => {
-  const accounts = await web3.eth.getAccounts(); // Contas do Ganache
+fastify.get("/check/:eventId", async (request, reply) => {
+  const { eventId } = request.params;
   try {
-    const receipt = await Betting.methods.resolveBets(1).send({
-      from: accounts[0],
-      gas: 300000,
-    });
+    const eventDetails = await EventManager.methods.events(eventId).call();
 
-    reply.send({ status: "sucess", transaction: receipt.transactionHash });
-  } catch (error) {
-    console.log(error);
-    reply.status(500).send(error.toString());
-  }
-});
-
-fastify.post("/check", async (request, reply) => {
-  const accounts = await web3.eth.getAccounts(); // Contas do Ganache
-  try {
-    const eventDetails = await Betting.methods.events(1).call();
-
-    console.log(eventDetails);
-    reply.send({ status: "sucess", transaction: eventDetails.transactionHash });
+    const eventData = {
+      eventId: eventId,
+      name: eventDetails.nameconst,
+      totalFor: web3.utils.toBigInt(eventDetails.totalFor).toString(),
+      totalAgainst: web3.utils.toBigInt(eventDetails.totalAgainst).toString(),
+      closed: eventDetails.closed,
+      result: web3.utils.toBigInt(eventDetails.result).toString(),
+      endTimestamp: web3.utils.toBigInt(eventDetails.endTimestamp).toString(),
+    };
+    reply
+      .status(200)
+      .send({ event: eventData, transaction: eventDetails.transactionHash });
   } catch (error) {
     console.log(error);
     reply.status(500).send(error.toString());
