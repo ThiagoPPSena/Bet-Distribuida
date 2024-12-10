@@ -12,6 +12,16 @@ contract EventManager {
         bool closed; // Evento fechado ou não
         uint256 result; // 0 for "open", 1 for "for", 2 for "against"
         uint256 endTimestamp; // Timestamp de encerramento do evento
+    } 
+    // Apenas para visualização
+    struct EventWithId { 
+        uint256 eventId;
+        string name;
+        uint256 totalFor;
+        uint256 totalAgainst;
+        bool closed;
+        uint256 result;
+        uint256 endTimestamp;
     }
     
     mapping(uint256 => Event) public events; // Mapping/Dicionário de eventos (ID: event)
@@ -103,7 +113,95 @@ contract EventManager {
         return eventCreators[_eventId];
     }
 
-    // =====---------------------------Funções de betting-------------------------------------=====
+    // Função para obter todos os eventos abertos
+    function getOpenEvents() public view returns (EventWithId[] memory) {
+        EventWithId[] memory openEvents = new EventWithId[](eventCount);
+        uint256 openEventCount = 0;
+
+        for (uint256 i = 0; i < eventCount; i++) {
+            if (!events[i].closed) {
+                openEvents[openEventCount] = EventWithId({
+                    eventId: i,
+                    name: events[i].name,
+                    totalFor: events[i].totalFor,
+                    totalAgainst: events[i].totalAgainst,
+                    closed: events[i].closed,
+                    result: events[i].result,
+                    endTimestamp: events[i].endTimestamp
+                });
+                openEventCount++;
+            }
+        }
+
+        // Redimensionar o array para o número real de eventos abertos
+        EventWithId[] memory result = new EventWithId[](openEventCount);
+        for (uint256 i = 0; i < openEventCount; i++) {
+            result[i] = openEvents[i];
+        }
+
+        return result;
+    }
+
+    // Função para obter todos os eventos que criei (como criador)
+    function getMyEvents() public view returns (EventWithId[] memory) {
+        EventWithId[] memory myEvents = new EventWithId[](eventCount);
+        uint256 myEventCount = 0;
+
+        for (uint256 i = 0; i < eventCount; i++) {
+            if (eventCreators[i] == msg.sender) {
+                myEvents[myEventCount] = EventWithId({
+                    eventId: i,
+                    name: events[i].name,
+                    totalFor: events[i].totalFor,
+                    totalAgainst: events[i].totalAgainst,
+                    closed: events[i].closed,
+                    result: events[i].result,
+                    endTimestamp: events[i].endTimestamp
+                });
+                myEventCount++;
+            }
+        }
+
+        // Redimensionar o array para o número real de eventos criados pelo usuário
+        EventWithId[] memory result = new EventWithId[](myEventCount);
+        for (uint256 i = 0; i < myEventCount; i++) {
+            result[i] = myEvents[i];
+        }
+
+        return result;
+    }
+
+    // Função para obter os eventos em que apostei
+    function getMyBets() public view returns (EventWithId[] memory) {
+        EventWithId[] memory myBets = new EventWithId[](eventCount);
+        uint256 myBetCount = 0;
+
+        for (uint256 i = 0; i < eventCount; i++) {
+            for (uint256 j = 0; j < bets[i].length; j++) {
+                if (bets[i][j].bettor == msg.sender) {
+                    myBets[myBetCount] = EventWithId({
+                        eventId: i,
+                        name: events[i].name,
+                        totalFor: events[i].totalFor,
+                        totalAgainst: events[i].totalAgainst,
+                        closed: events[i].closed,
+                        result: events[i].result,
+                        endTimestamp: events[i].endTimestamp
+                    });
+                    myBetCount++;
+                    break;
+                }
+            }
+        }
+
+        // Redimensionar o array para o número real de eventos apostados pelo usuário
+        EventWithId[] memory result = new EventWithId[](myBetCount);
+        for (uint256 i = 0; i < myBetCount; i++) {
+            result[i] = myBets[i];
+        }
+
+        return result;
+    }
 
     // Função em que o usuário insere o valor (aposta) em um evento
     function placeBet(uint256 _eventId, uint256 _choice) public payable {
