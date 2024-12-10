@@ -15,7 +15,7 @@ const theme = createTheme({
       paper: '#ffffff', // Cor de cartões
     },
     warning: {
-      main: '#FFC107', // Cor de alerta
+      main: '#ff2151', // Cor de alerta
     },
     success: {
       main: '#28a745', // Cor de sucesso

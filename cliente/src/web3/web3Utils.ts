@@ -1,9 +1,10 @@
-import web3 from "./web3";
+import web3 from './web3';
 
-import contractEventJSON from "../../../servidor/build/contracts/EventManager.json";
+import contractEventJSON from '../../../servidor/build/contracts/EventManager.json';
 
 const contractEventABI = contractEventJSON.abi;
-const contractAddressEvent: string = "0x6536aEAa8E9ab4759aE3D35C3A3B8426A2a91Aa2";
+const contractAddressEvent: string =
+  '0xAAB05409074acd87dF0BE21A0877B51bdfB00508';
 
 const EventManager = new web3.eth.Contract(
   contractEventABI,
@@ -40,16 +41,15 @@ async function getBalance(account: string): Promise<string | Error> {
 async function createEvent(
   name: string,
   endTimestamp: string,
-  account: string,
-): Promise<{message: string} | Error> {
+  account: string
+): Promise<{ message: string } | Error> {
   try {
     await EventManager.methods.createEvent(name, endTimestamp).send({
       from: account,
-      gas: "1299999", 
+      gas: '1299999',
     });
-    return {message: `Evento criado com sucesso!`};
-  }
-  catch (error: unknown) {
+    return { message: `Evento criado com sucesso!` };
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return new Error(`Erro: ${error.message}`);
     }
@@ -60,39 +60,15 @@ async function createEvent(
 // Função para fechar evento
 async function closeEvent(
   eventId: number,
-  account: string,
-): Promise<{message: string} | Error> {
+  account: string
+): Promise<{ message: string } | Error> {
   try {
     await EventManager.methods.closeEvent(eventId).send({
       from: account,
-      gas: "1299999", 
+      gas: '1299999',
     });
-    return {message: `Evento fechado com sucesso!`};
-  }
-  catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
-  }
-} 
-
-// Função para apostar em um evento
-async function betEvent(
-  eventId: number,
-  choice: number,
-  value: number,
-  account: string,
-): Promise<{message: string} | Error> {
-  try {
-    await EventManager.methods.placeBet(eventId, choice).send({
-      from: account,
-      gas: "1299999", 
-      value: String(value),
-    });
-    return {message: `Aposta realizada com sucesso!`};
-  }
-  catch (error: unknown) {
+    return { message: `Evento fechado com sucesso!` };
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return new Error(`Erro: ${error.message}`);
     }
@@ -100,7 +76,30 @@ async function betEvent(
   }
 }
 
-export interface OpenEvent { // Data formatada para o front-end
+// Função para apostar em um evento
+async function betEvent(
+  eventId: number,
+  choice: number,
+  value: number,
+  account: string
+): Promise<{ message: string } | Error> {
+  try {
+    await EventManager.methods.placeBet(eventId, choice).send({
+      from: account,
+      gas: '1299999',
+      value: String(value),
+    });
+    return { message: `Aposta realizada com sucesso!` };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new Error(`Erro: ${error.message}`);
+    }
+    return new Error('Erro desconhecido');
+  }
+}
+
+export interface OpenEvent {
+  // Data formatada para o front-end
   eventId: string;
   name: string;
   totalFor: string;
@@ -111,16 +110,21 @@ export interface OpenEvent { // Data formatada para o front-end
 }
 
 // Função para pegar os eventos abertos
-async function getOpenEvents(): Promise<{events: OpenEvent[]} | Error> {
+async function getOpenEvents(): Promise<{ events: OpenEvent[] } | Error> {
   try {
-    // await createEvent("Evento 1", "1633084800", "0x1BDA7D8D1FA0aDf9098F9198F0EA1792C96908E4");
-    const openEvents: OpenEvent[] = await EventManager.methods.getOpenEvents().call();
+    await createEvent(
+      'Evento 1',
+      '1633084800',
+      '0x7Ff87Bacee62635585b50067Fe12B92Dce280814'
+    );
+    const openEvents: OpenEvent[] = await EventManager.methods
+      .getOpenEvents()
+      .call();
     // console.log(openEvents);
 
     if (!Array.isArray(openEvents) || openEvents.length === 0) {
       return new Error('Nenhum evento aberto encontrado');
     }
-
 
     const eventDataFormatted: OpenEvent[] = openEvents.map((event) => {
       return {
@@ -129,14 +133,12 @@ async function getOpenEvents(): Promise<{events: OpenEvent[]} | Error> {
         totalFor: web3.utils.fromWei(event.totalFor, 'ether'),
         totalAgainst: web3.utils.fromWei(event.totalAgainst, 'ether'),
         closed: event.closed,
-        result: web3.utils.toBigInt(event.result).toString(),  
+        result: web3.utils.toBigInt(event.result).toString(),
         endTimestamp: web3.utils.toBigInt(event.endTimestamp).toString(),
-
       };
     });
-    return {events: eventDataFormatted};
-  }
-  catch (error: unknown) {
+    return { events: eventDataFormatted };
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return new Error(`Erro: ${error.message}`);
     }
@@ -145,9 +147,13 @@ async function getOpenEvents(): Promise<{events: OpenEvent[]} | Error> {
 }
 
 // Função para pegar os eventos do usuário
-async function getMyEvents(account: string): Promise<{events: OpenEvent[]} | Error> {
+async function getMyEvents(
+  account: string
+): Promise<{ events: OpenEvent[] } | Error> {
   try {
-    const myEvents: OpenEvent[] = await EventManager.methods.getMyEvents().call({from: account});
+    const myEvents: OpenEvent[] = await EventManager.methods
+      .getMyEvents()
+      .call({ from: account });
     console.log(myEvents);
 
     if (!Array.isArray(myEvents) || myEvents.length === 0) {
@@ -161,13 +167,12 @@ async function getMyEvents(account: string): Promise<{events: OpenEvent[]} | Err
         totalFor: web3.utils.fromWei(event.totalFor, 'ether'),
         totalAgainst: web3.utils.fromWei(event.totalAgainst, 'ether'),
         closed: event.closed,
-        result: web3.utils.toBigInt(event.result).toString(),  
+        result: web3.utils.toBigInt(event.result).toString(),
         endTimestamp: web3.utils.toBigInt(event.endTimestamp).toString(),
       };
     });
-    return {events: eventDataFormatted};
-  }
-  catch (error: unknown) {
+    return { events: eventDataFormatted };
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return new Error(`Erro: ${error.message}`);
     }
@@ -176,9 +181,13 @@ async function getMyEvents(account: string): Promise<{events: OpenEvent[]} | Err
 }
 
 // Função para pegar as apostas do usuário
-async function getMyBets(account: string): Promise<{events: OpenEvent[]} | Error> {
+async function getMyBets(
+  account: string
+): Promise<{ events: OpenEvent[] } | Error> {
   try {
-    const myBets: OpenEvent[] = await EventManager.methods.getMyBets().call({from: account});
+    const myBets: OpenEvent[] = await EventManager.methods
+      .getMyBets()
+      .call({ from: account });
     console.log(myBets);
 
     if (!Array.isArray(myBets) || myBets.length === 0) {
@@ -192,20 +201,18 @@ async function getMyBets(account: string): Promise<{events: OpenEvent[]} | Error
         totalFor: web3.utils.fromWei(event.totalFor, 'ether'),
         totalAgainst: web3.utils.fromWei(event.totalAgainst, 'ether'),
         closed: event.closed,
-        result: web3.utils.toBigInt(event.result).toString(),  
+        result: web3.utils.toBigInt(event.result).toString(),
         endTimestamp: web3.utils.toBigInt(event.endTimestamp).toString(),
       };
     });
-    return {events: eventDataFormatted};
-  }
-  catch (error: unknown) {
+    return { events: eventDataFormatted };
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return new Error(`Erro: ${error.message}`);
     }
     return new Error('Erro desconhecido');
   }
 }
-
 
 const web3Utils = {
   EventManager,
