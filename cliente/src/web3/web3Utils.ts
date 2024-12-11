@@ -1,10 +1,10 @@
 import web3 from './web3';
-
 import contractEventJSON from '../../../servidor/build/contracts/EventManager.json';
+import contractAddress from '../../../contractAddress.json'
+
 
 const contractEventABI = contractEventJSON.abi;
-const contractAddressEvent: string =
-  '0xc801E2cF9cff381F101Cf9cdC107c6a26775047E';
+const contractAddressEvent = contractAddress.contractAddress;
 
 const EventManager = new web3.eth.Contract(
   contractEventABI,
