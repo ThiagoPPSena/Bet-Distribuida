@@ -16,7 +16,6 @@ function RoutesBet() {
           {/* Rotas Filhas */}
           <Route index element={<AllEvents />} /> {/* Rota padrão */}
           <Route path="/myEvents" element={<MyEvents />} />
-          <Route path="/myEvents" element={<MyEvents />} />
           <Route path="/myParticipations" element={<EventsAttended />} />
         </Route>
       </Routes>

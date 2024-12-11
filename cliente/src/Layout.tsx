@@ -85,11 +85,6 @@ function Layout() {
             <ListItemText primary={'Meus Eventos'} />
           </ListItemButton>
         </ListItem>
-        <ListItem key={'Criar Eventos'} disablePadding>
-          <ListItemButton component={Link} to="/createEvents">
-            <ListItemText primary={'Criar Eventos'} />
-          </ListItemButton>
-        </ListItem>
         <ListItem key={'Minhas apostas'} disablePadding>
           <ListItemButton component={Link} to="/myParticipations">
             <ListItemText primary={'Minhas Apostas'} />

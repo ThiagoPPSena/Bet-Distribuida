@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CoinFlipModal from './CoinFlipModal';
 import { useState } from 'react';
 import { useAccount } from '../contexts/AccountContext';
+import CreateModal from './createModal';
 
 interface GridEventsProps {
   eventsData: { events: OpenEvent[] };
@@ -20,12 +21,17 @@ function GridEvents({ eventsData }: GridEventsProps) {
   const { account } = useAccount();
 
   const [openModalChoice, setOpenModalChoice] = useState<boolean>(false);
+  const [openModalCreate, setOpenModalCreate] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
 
   const handleBetChoice = (eventId: string) => {
     setSelectedEventId(eventId);
     setOpenModalChoice(!openModalChoice);
   };
+
+  const handleCreateEvent = () => {
+    setOpenModalCreate(!openModalCreate)
+  }
 
   const handleBetConfirm = (betChoice: number, value: string) => {
     console.log(betChoice, value);
@@ -51,6 +57,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
 
   return (
     <>
+      <CreateModal open={openModalCreate} onClose={() => setOpenModalCreate(!openModalCreate)}/>
       <CoinFlipModal
         open={openModalChoice}
         onClose={() => setOpenModalChoice(!openModalChoice)}
@@ -140,6 +147,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
           ))}
         <Grid size={{ xl: 2, lg: 3, md: 4, sm: 6, xs: 12 }}>
           <Card
+            onClick={() => handleCreateEvent()}
             sx={{
               minWidth: 250,
               maxWidth: 350,
