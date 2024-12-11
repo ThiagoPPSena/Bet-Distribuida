@@ -2,6 +2,7 @@ import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "../Layout";
 import MyEvents from "../screens/MyEvents";
 import AllEvents from "../screens/AllEvents";
+import EventsAttended from "../screens/EventsAttended";
 
 
 function RoutesBet() {
@@ -15,6 +16,8 @@ function RoutesBet() {
           {/* Rotas Filhas */}
           <Route index element={<AllEvents />} /> {/* Rota padrão */}
           <Route path="/myEvents" element={<MyEvents />} />
+          <Route path="/myEvents" element={<MyEvents />} />
+          <Route path="/myParticipations" element={<EventsAttended />} />
         </Route>
       </Routes>
     </Router>

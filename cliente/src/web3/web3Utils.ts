@@ -4,7 +4,7 @@ import contractEventJSON from '../../../servidor/build/contracts/EventManager.js
 
 const contractEventABI = contractEventJSON.abi;
 const contractAddressEvent: string =
-  '0xAAB05409074acd87dF0BE21A0877B51bdfB00508';
+  '0xc801E2cF9cff381F101Cf9cdC107c6a26775047E';
 
 const EventManager = new web3.eth.Contract(
   contractEventABI,
@@ -59,7 +59,7 @@ async function createEvent(
 
 // Função para fechar evento
 async function closeEvent(
-  eventId: number,
+  eventId: string,
   account: string
 ): Promise<{ message: string } | Error> {
   try {
@@ -78,16 +78,17 @@ async function closeEvent(
 
 // Função para apostar em um evento
 async function betEvent(
-  eventId: number,
+  eventId: string,
   choice: number,
-  value: number,
+  value: string,
   account: string
 ): Promise<{ message: string } | Error> {
   try {
+    const valueInWei = web3.utils.toWei(value, 'ether'); // Converte o valor de Ether para Wei
     await EventManager.methods.placeBet(eventId, choice).send({
       from: account,
       gas: '1299999',
-      value: String(value),
+      value: valueInWei,
     });
     return { message: `Aposta realizada com sucesso!` };
   } catch (error: unknown) {
@@ -112,16 +113,14 @@ export interface OpenEvent {
 // Função para pegar os eventos abertos
 async function getOpenEvents(): Promise<{ events: OpenEvent[] } | Error> {
   try {
-    await createEvent(
-      'Evento 1',
-      '1633084800',
-      '0x7Ff87Bacee62635585b50067Fe12B92Dce280814'
-    );
+    // await createEvent(
+    //   'Evento 1',
+    //   '1633084800',
+    //   '0xda4062797ea155095fe8aEc85fe52C330E0303e7'
+    // );
     const openEvents: OpenEvent[] = await EventManager.methods
       .getOpenEvents()
       .call();
-    // console.log(openEvents);
-
     if (!Array.isArray(openEvents) || openEvents.length === 0) {
       return new Error('Nenhum evento aberto encontrado');
     }
@@ -154,7 +153,6 @@ async function getMyEvents(
     const myEvents: OpenEvent[] = await EventManager.methods
       .getMyEvents()
       .call({ from: account });
-    console.log(myEvents);
 
     if (!Array.isArray(myEvents) || myEvents.length === 0) {
       return new Error('Nenhum evento encontrado');
@@ -188,7 +186,6 @@ async function getMyBets(
     const myBets: OpenEvent[] = await EventManager.methods
       .getMyBets()
       .call({ from: account });
-    console.log(myBets);
 
     if (!Array.isArray(myBets) || myBets.length === 0) {
       return new Error('Nenhuma aposta encontrada');

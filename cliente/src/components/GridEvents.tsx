@@ -6,85 +6,168 @@ import {
   Button,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { OpenEvent } from '../web3/web3Utils';
+import web3Utils, { OpenEvent } from '../web3/web3Utils';
 import AddIcon from '@mui/icons-material/Add';
+import CoinFlipModal from './CoinFlipModal';
+import { useState } from 'react';
+import { useAccount } from '../contexts/AccountContext';
 
 interface GridEventsProps {
   eventsData: { events: OpenEvent[] };
 }
 
 function GridEvents({ eventsData }: GridEventsProps) {
+  const { account } = useAccount();
+
+  const [openModalChoice, setOpenModalChoice] = useState<boolean>(false);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+
+  const handleBetChoice = (eventId: string) => {
+    setSelectedEventId(eventId);
+    setOpenModalChoice(!openModalChoice);
+  };
+
+  const handleBetConfirm = (betChoice: number, value: string) => {
+    console.log(betChoice, value);
+    void web3Utils
+      .betEvent(selectedEventId, betChoice, value, account)
+      .then((res) => {
+        if (res instanceof Error) {
+          console.log(res.message);
+        }
+        console.log(res);
+      });
+    //Colocar uma aviso snacker
+  };
+
+  const handleEventClose = (eventId: string) => {
+    void web3Utils.closeEvent(eventId, account).then((res) => {
+      if (res instanceof Error) {
+        console.log(res.message);
+      }
+      console.log(res);
+    });
+  };
+
   return (
-    <Grid
-      container
-      spacing={2}
-      sx={{ padding: 2 }}
-      alignItems="left"
-      justifyItems="center"
-    >
-      {eventsData.events &&
-        eventsData.events.map((event, index) => (
-          <Grid size={3} key={index}>
-            <Card sx={{ minWidth: 250, maxWidth: 350, borderRadius: '16px' }}>
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  sx={{ color: 'text.secondary', fontSize: 14 }}
-                >
-                  Aposta {event.closed ? 'fechada' : 'aberta'}
-                </Typography>
-                <Typography variant="h5" component="div">
-                  {event.name}
-                </Typography>
-                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                  Cara ou Coroa
-                </Typography>
-                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                  Total Cara: {event.totalFor} ETH
-                </Typography>
-                <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                  Total Coroa: {event.totalAgainst} ETH
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button disabled={event.closed} color="secondary" size="small">
-                  Apostar
-                </Button>
-                <Button disabled={event.closed} color="warning" size="small">
-                  Encerrar
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      <Grid size={3}>
-        <Card
-          sx={{
-            minWidth: 250,
-            maxWidth: 350,
-            borderRadius: '16px',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s, box-shadow 0.3s',
-            '&:hover': {
-              backgroundColor: '#5A157F',
-              '& .MuiSvgIcon-root': {
-                // Aqui estamos afetando o ícone dentro do Card
-                color: 'white', // Mudando a cor do ícone ao passar o mouse sobre o Card
+    <>
+      <CoinFlipModal
+        open={openModalChoice}
+        onClose={() => setOpenModalChoice(!openModalChoice)}
+        onConfirm={(betChoice: number, value: string) => {
+          handleBetConfirm(betChoice, value);
+        }}
+      />
+      <Grid
+        container
+        spacing={2}
+        sx={{ padding: 2 }}
+        alignItems="stretch" /* Garante que todos os itens tenham a mesma altura */
+        justifyContent="flex-start"
+      >
+        {eventsData.events &&
+          eventsData.events.map((event, index) => (
+            <Grid size={{ xl: 2, lg: 3, md: 4, sm: 6, xs: 12 }} key={index}>
+              <Card
+                sx={{
+                  minWidth: 250,
+                  maxWidth: 350,
+                  minHeight: 250,
+                  maxHeight: 350,
+                  borderRadius: '16px',
+                }}
+              >
+                <CardContent>
+                  <Typography
+                    gutterBottom
+                    sx={{ color: 'text.secondary', fontSize: 14 }}
+                  >
+                    Aposta {event.closed ? 'fechada' : 'aberta'}
+                  </Typography>
+                  <Typography variant="h5" component="div">
+                    {event.name}
+                  </Typography>
+                  <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
+                    {event.closed
+                      ? event.result === '1'
+                        ? 'Resultado: Cara'
+                        : 'Resultado: Coroa'
+                      : 'Cara ou Coroa'}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: 'text.secondary',
+                      mb: 1.5,
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Total Cara: {event.totalFor} ETH
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: 'text.secondary',
+                      mb: 1.5,
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Total Coroa: {event.totalAgainst} ETH
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{ justifyContent: 'flex-end', gap: 2 }}>
+                  <Button
+                    disabled={event.closed}
+                    color="warning"
+                    size="small"
+                    onClick={() => handleEventClose(event.eventId)}
+                  >
+                    Encerrar
+                  </Button>
+                  <Button
+                    disabled={event.closed}
+                    color="secondary"
+                    size="small"
+                    onClick={() => handleBetChoice(event.eventId)}
+                  >
+                    Apostar
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        <Grid size={{ xl: 2, lg: 3, md: 4, sm: 6, xs: 12 }}>
+          <Card
+            sx={{
+              minWidth: 250,
+              maxWidth: 350,
+              borderRadius: '16px',
+              minHeight: 250,
+              maxHeight: 350,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s, box-shadow 0.3s',
+              '&:hover': {
+                backgroundColor: '#5A157F',
+                '& .MuiSvgIcon-root': {
+                  // Aqui estamos afetando o ícone dentro do Card
+                  color: 'white', // Mudando a cor do ícone ao passar o mouse sobre o Card
+                },
               },
-            },
-          }}
-        >
-          <CardActions sx={{ textAlign: 'center' }}>
-            <AddIcon sx={{ color: '#5A157F', fontSize: 100 }} />
-          </CardActions>
-        </Card>
+            }}
+          >
+            <CardActions sx={{ textAlign: 'center' }}>
+              <AddIcon sx={{ color: '#5A157F', fontSize: 100 }} />
+            </CardActions>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 }
 

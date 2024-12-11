@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from 'react';
 import {
   Modal,
   Box,
@@ -8,17 +8,30 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-} from "@mui/material";
+  TextField,
+  InputAdornment,
+} from '@mui/material';
 
-const CoinFlipModal = ({ open, onClose, onConfirm }) => {
-  const [betChoice, setBetChoice] = useState("cara");
+interface CoinFlipModalProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (betChoice: number, value: string) => void;
+}
 
-  const handleBetChange = (event) => {
-    setBetChoice(event.target.value);
+const CoinFlipModal = ({ open, onClose, onConfirm }: CoinFlipModalProps) => {
+  const [betChoice, setBetChoice] = useState<number>(1);
+  const [betValue, setBetValue] = useState<string>('');
+
+  const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBetValue(event.target.value);
+  };
+
+  const handleBetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBetChoice(Number(event.target.value));
   };
 
   const handleConfirm = () => {
-    onConfirm(betChoice);
+    onConfirm(betChoice, betValue);
     onClose();
   };
 
@@ -31,35 +44,68 @@ const CoinFlipModal = ({ open, onClose, onConfirm }) => {
     >
       <Box
         sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 300,
-          bgcolor: "background.paper",
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 350,
+          bgcolor: 'background.paper',
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
         }}
       >
-        <Typography id="coin-flip-modal-title" variant="h6" component="h2" gutterBottom>
+        <Typography
+          id="coin-flip-modal-title"
+          variant="h6"
+          component="h2"
+          gutterBottom
+        >
           Apostar em Cara ou Coroa
         </Typography>
-        <FormControl>
-          <RadioGroup
-            value={betChoice}
-            onChange={handleBetChange}
-            name="coin-bet-options"
-          >
-            <FormControlLabel value="cara" control={<Radio />} label="Cara" />
-            <FormControlLabel value="coroa" control={<Radio />} label="Coroa" />
-          </RadioGroup>
-        </FormControl>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button variant="outlined" color="secondary" onClick={onClose}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Box>
+            <FormControl>
+              <RadioGroup
+                value={betChoice}
+                onChange={handleBetChange}
+                name="coin-bet-options"
+              >
+                <FormControlLabel value={1} control={<Radio />} label="Cara" />
+                <FormControlLabel value={2} control={<Radio />} label="Coroa" />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+          <Box>
+            <TextField
+              id="bet-value"
+              label="Valor"
+              variant="outlined"
+              value={betValue}
+              onChange={handleValueChange}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">ETH</InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, mt: 3, justifyContent: 'right' }}>
+          <Button variant="outlined" color="warning" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="contained" color="primary" onClick={handleConfirm}>
+          <Button variant="contained" color="success" onClick={handleConfirm}>
             Confirmar
           </Button>
         </Box>

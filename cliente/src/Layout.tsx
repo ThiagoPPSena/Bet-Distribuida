@@ -90,6 +90,11 @@ function Layout() {
             <ListItemText primary={'Criar Eventos'} />
           </ListItemButton>
         </ListItem>
+        <ListItem key={'Minhas apostas'} disablePadding>
+          <ListItemButton component={Link} to="/myParticipations">
+            <ListItemText primary={'Minhas Apostas'} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
@@ -115,14 +120,13 @@ function Layout() {
             edge="start"
             color="inherit"
             aria-label="menu"
-            sx={{ pr: 2 }}
             onClick={toggleDrawer(true)}
           >
             <MenuIcon />
           </IconButton>
 
           {/* Título ou logo */}
-          <Typography variant="h6" color="inherit" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" color="inherit" sx={{ flexGrow: 1, ml: 1 }}>
             Bet Distribuída
           </Typography>
 
@@ -179,9 +183,8 @@ function Layout() {
         sx={{
           display: 'flex',
           height: '100%',
-          alignItems: 'center',
-          flexDirection: 'column',
           width: '100%',
+          flexDirection: 'column',
           overflow: 'auto',
           '&::-webkit-scrollbar': {
             width: '8px',
