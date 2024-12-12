@@ -13,12 +13,18 @@ import {
 } from '@mui/material';
 
 interface CoinFlipModalProps {
+  title: string;
   open: boolean;
   onClose: () => void;
   onConfirm: (betChoice: number, value: string) => void;
 }
 
-const CoinFlipModal = ({ open, onClose, onConfirm }: CoinFlipModalProps) => {
+const CoinFlipModal = ({
+  title,
+  open,
+  onClose,
+  onConfirm,
+}: CoinFlipModalProps) => {
   const [betChoice, setBetChoice] = useState<number>(1);
   const [betValue, setBetValue] = useState<string>('');
 
@@ -61,7 +67,7 @@ const CoinFlipModal = ({ open, onClose, onConfirm }: CoinFlipModalProps) => {
           component="h2"
           gutterBottom
         >
-          Apostar em Cara ou Coroa
+          {title}
         </Typography>
         <Box
           sx={{
@@ -79,12 +85,24 @@ const CoinFlipModal = ({ open, onClose, onConfirm }: CoinFlipModalProps) => {
                 onChange={handleBetChange}
                 name="coin-bet-options"
               >
-                <FormControlLabel value={1} control={<Radio />} label="Cara" />
-                <FormControlLabel value={2} control={<Radio />} label="Coroa" />
+                <FormControlLabel
+                  value={1}
+                  control={<Radio />}
+                  label="A favor"
+                />
+                <FormControlLabel
+                  value={2}
+                  control={<Radio />}
+                  label="Contra"
+                />
               </RadioGroup>
             </FormControl>
           </Box>
-          <Box>
+          <Box
+            sx={{
+              width: '10em',
+            }}
+          >
             <TextField
               id="bet-value"
               label="Valor"
@@ -105,7 +123,7 @@ const CoinFlipModal = ({ open, onClose, onConfirm }: CoinFlipModalProps) => {
           <Button variant="outlined" color="warning" onClick={onClose}>
             Cancelar
           </Button>
-          <Button variant="contained" color="success" onClick={handleConfirm}>
+          <Button variant="contained" color="primary" onClick={handleConfirm}>
             Confirmar
           </Button>
         </Box>

@@ -2,12 +2,14 @@ import web3Utils, { OpenEvent } from '../web3/web3Utils';
 import { useEffect, useState } from 'react';
 import GridEvents from '../components/GridEvents';
 import { useAccount } from '../contexts/AccountContext';
+import { useEventsTrigger } from '../contexts/TriggerEvents';
 
 function MyEvents() {
   const { account } = useAccount();
   const [eventsData, setEventsData] = useState<{ events: OpenEvent[] }>(
     {} as { events: OpenEvent[] }
   );
+  const { eventsTriggerUpdate } = useEventsTrigger();
 
   useEffect(() => {
     const getMyEvents = async () => {
@@ -19,7 +21,7 @@ function MyEvents() {
       }
     };
     void getMyEvents();
-  }, [account]);
+  }, [account, eventsTriggerUpdate]);
 
   return (
     <>

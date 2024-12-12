@@ -14,6 +14,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs'; // Garantindo que dayjs esteja importado corretamente
 import { useAccount } from '../contexts/AccountContext';
 import web3Utils from '../web3/web3Utils';
+import { useEventsTrigger } from '../contexts/TriggerEvents';
 
 // Estilo do modal
 const modalStyle = {
@@ -49,6 +50,8 @@ function CreateModal({ open, onClose, setSnackbar }: CreateModalProps) {
   // Estado para armazenar a data de encerramento selecionada
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
+  const { eventsTriggerUpdate } = useEventsTrigger();
+
   // Função para lidar com a mudança no input
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -81,6 +84,7 @@ function CreateModal({ open, onClose, setSnackbar }: CreateModalProps) {
             message: res.message,
             severity: 'success',
           });
+          eventsTriggerUpdate();
         }
       });
 
