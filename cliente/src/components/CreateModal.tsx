@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs, { Dayjs } from 'dayjs'; // Garantindo que dayjs esteja importado corretamente
+import { Dayjs } from 'dayjs'; // Garantindo que dayjs esteja importado corretamente
 import { useAccount } from '../contexts/AccountContext';
 import web3Utils from '../web3/web3Utils';
   

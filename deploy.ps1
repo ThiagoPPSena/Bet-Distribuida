@@ -26,6 +26,9 @@ if (-not $contractAddress) {
 
 Write-Output "Endereco do contrato obtido: $contractAddress"
 
+# Remove espaços extras antes e depois do contract address
+$contractAddress = $contractAddress.Trim()
+
 # Retorna para a raiz do projeto
 Set-Location ..
 
