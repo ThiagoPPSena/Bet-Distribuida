@@ -1,7 +1,6 @@
 import web3 from './web3';
 import contractEventJSON from '../../../servidor/build/contracts/EventManager.json';
-import contractAddress from '../../../contractAddress.json'
-
+import contractAddress from '../../../contractAddress.json';
 
 const contractEventABI = contractEventJSON.abi;
 const contractAddressEvent = contractAddress.contractAddress;
@@ -11,16 +10,34 @@ const EventManager = new web3.eth.Contract(
   contractAddressEvent
 );
 
+interface ContractExecutionError extends Error {
+  cause?: {
+    message: string;
+  };
+  code?: number;
+}
+
+function captureRevertMessage(error: unknown): string {
+  if (error instanceof Error) {
+    const contractError = error as ContractExecutionError;
+    const revertMessageMatch =
+      contractError.cause?.message.match(/revert (.*)/);
+    const revertMessage = revertMessageMatch
+      ? revertMessageMatch[1]
+      : 'Erro desconhecido';
+    return revertMessage;
+  }
+  return 'Erro desconhecido';
+}
+
 // Função para pegar as contas do Ganache
 async function getGanacheAccounts(): Promise<string[] | Error> {
   try {
     const accounts = await web3.eth.getAccounts(); // Obtém as contas
     return accounts;
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -30,10 +47,8 @@ async function getBalance(account: string): Promise<string | Error> {
     const balance = await web3.eth.getBalance(account); // Obtém o saldo da conta
     return web3.utils.fromWei(balance, 'ether');
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -50,10 +65,8 @@ async function createEvent(
     });
     return { message: `Evento criado com sucesso!` };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -69,10 +82,9 @@ async function closeEvent(
     });
     return { message: `Evento fechado com sucesso!` };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    console.log(friendlyMessage);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -92,10 +104,8 @@ async function betEvent(
     });
     return { message: `Aposta realizada com sucesso!` };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -138,10 +148,8 @@ async function getOpenEvents(): Promise<{ events: OpenEvent[] } | Error> {
     });
     return { events: eventDataFormatted };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -171,10 +179,8 @@ async function getMyEvents(
     });
     return { events: eventDataFormatted };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 
@@ -204,10 +210,8 @@ async function getMyBets(
     });
     return { events: eventDataFormatted };
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return new Error(`Erro: ${error.message}`);
-    }
-    return new Error('Erro desconhecido');
+    const friendlyMessage = captureRevertMessage(error);
+    return new Error(friendlyMessage);
   }
 }
 

@@ -4,6 +4,8 @@ import {
   Typography,
   CardActions,
   Button,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import web3Utils, { OpenEvent } from '../web3/web3Utils';
@@ -11,7 +13,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CoinFlipModal from './CoinFlipModal';
 import { useState } from 'react';
 import { useAccount } from '../contexts/AccountContext';
-import CreateModal from './createModal';
+import CreateModal from './CreateModal';
 
 interface GridEventsProps {
   eventsData: { events: OpenEvent[] };
@@ -30,34 +32,72 @@ function GridEvents({ eventsData }: GridEventsProps) {
   };
 
   const handleCreateEvent = () => {
-    setOpenModalCreate(!openModalCreate)
-  }
+    setOpenModalCreate(!openModalCreate);
+  };
+
+  // Estado para ativar o snackbar de sucesso ou erro
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   const handleBetConfirm = (betChoice: number, value: string) => {
-    console.log(betChoice, value);
     void web3Utils
       .betEvent(selectedEventId, betChoice, value, account)
       .then((res) => {
         if (res instanceof Error) {
-          console.log(res.message);
+          setSnackbar({
+            open: true,
+            message: res.message,
+            severity: 'error',
+          });
         }
-        console.log(res);
+        setSnackbar({
+          open: true,
+          message: res.message,
+          severity: 'success',
+        });
       });
-    //Colocar uma aviso snacker
   };
 
   const handleEventClose = (eventId: string) => {
     void web3Utils.closeEvent(eventId, account).then((res) => {
       if (res instanceof Error) {
-        console.log(res.message);
+        setSnackbar({
+          open: true,
+          message: res.message,
+          severity: 'error',
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: res.message,
+          severity: 'success',
+        });
       }
-      console.log(res);
     });
   };
 
   return (
     <>
-      <CreateModal open={openModalCreate} onClose={() => setOpenModalCreate(!openModalCreate)}/>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+      </Snackbar>
+      <CreateModal
+        setSnackbar={setSnackbar}
+        open={openModalCreate}
+        onClose={() => setOpenModalCreate(!openModalCreate)}
+      />
       <CoinFlipModal
         open={openModalChoice}
         onClose={() => setOpenModalChoice(!openModalChoice)}

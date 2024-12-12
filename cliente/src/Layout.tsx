@@ -35,8 +35,9 @@ function Layout() {
       const formattedBalance = parseFloat(balance).toFixed(3);
       setBalanceEth(formattedBalance);
     };
-
-    void getBalance();
+    if (account) {
+      void getBalance();
+    }
   }, [account]); // Dependência account para executar sempre que account mudar
 
   useEffect(() => {

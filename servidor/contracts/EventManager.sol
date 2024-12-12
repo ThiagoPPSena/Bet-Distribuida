@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 contract EventManager {
-
     uint256 public constant COMMISSION = 5; // 5% do valor apostado no evento vai para o criador
-    
+
     struct Event {
         string name; // Nome do evento
         uint256 totalFor; // Total de apostas a favor
@@ -12,9 +11,9 @@ contract EventManager {
         bool closed; // Evento fechado ou não
         uint256 result; // 0 for "open", 1 for "for", 2 for "against"
         uint256 endTimestamp; // Timestamp de encerramento do evento
-    } 
+    }
     // Apenas para visualização
-    struct EventWithId { 
+    struct EventWithId {
         uint256 eventId;
         string name;
         uint256 totalFor;
@@ -23,12 +22,12 @@ contract EventManager {
         uint256 result;
         uint256 endTimestamp;
     }
-    
+
     mapping(uint256 => Event) public events; // Mapping/Dicionário de eventos (ID: event)
     mapping(uint256 => address) public eventCreators; // Criador de cada evento
     uint256 public eventCount = 0;
 
-     struct Bet {
+    struct Bet {
         address bettor;
         uint256 value;
         uint256 choice; // 1 ou 2
@@ -39,14 +38,7 @@ contract EventManager {
 
     // Função para criação de evento (adicionando-o ao dicionário)
     function createEvent(string memory _name, uint256 _endTimestamp) public {
-        events[eventCount] = Event(
-            _name,
-            0,
-            0,
-            false,
-            0,
-            _endTimestamp
-        );
+        events[eventCount] = Event(_name, 0, 0, false, 0, _endTimestamp);
         eventCreators[eventCount] = msg.sender; // Armazena o criador do evento
         eventCount++;
     }
@@ -58,11 +50,13 @@ contract EventManager {
 
         uint256 winningChoice = eventDetails.result;
         uint256 totalPool = eventDetails.totalFor + eventDetails.totalAgainst;
-        uint256 winningPool = (winningChoice == 1) ? eventDetails.totalFor : eventDetails.totalAgainst;
+        uint256 winningPool = (winningChoice == 1)
+            ? eventDetails.totalFor
+            : eventDetails.totalAgainst;
 
         // Pega o criador do evento pelo event id
         address creatorEvent = getEventCreator(_eventId);
-        
+
         // Caso não haja apostas na escolha vencedora
         if (winningPool == 0) {
             // Transfere todo o saldo do evento ao criador
@@ -96,17 +90,24 @@ contract EventManager {
     // Função para encerrar um evento e registrar o resultado
     function closeEvent(uint256 _eventId) public {
         require(!events[_eventId].closed, "Evento ja fechado");
-        require(msg.sender == eventCreators[_eventId], "Apenas o criador do evento pode fechar");
-        require(block.timestamp >= events[_eventId].endTimestamp, "Evento ainda nao encerrado");
+        require(
+            msg.sender == eventCreators[_eventId],
+            "Apenas o criador do evento pode fechar"
+        );
+        require(
+            block.timestamp >= events[_eventId].endTimestamp,
+            "Evento ainda nao pode ser encerrado"
+        );
 
         // Sorteio do resultado
-        uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 2 + 1;
+        uint256 random = (uint256(
+            keccak256(abi.encodePacked(block.timestamp, msg.sender))
+        ) % 2) + 1;
 
         events[_eventId].result = random;
         events[_eventId].closed = true;
         resolveBets(_eventId);
     }
-
 
     // Função para consultar o criador de um evento
     function getEventCreator(uint256 _eventId) public view returns (address) {
@@ -213,13 +214,11 @@ contract EventManager {
         // Se a escolha for a primeira
         if (_choice == 1) {
             events[_eventId].totalFor += msg.value;
-        // Se a escolha for a segunda
-        } else if (_choice == 2){
+            // Se a escolha for a segunda
+        } else if (_choice == 2) {
             events[_eventId].totalAgainst += msg.value;
         } else {
             revert("Escolha invalida");
         }
     }
-
-    
 }
