@@ -175,7 +175,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
                   </Button>
                   <Button
                     disabled={event.closed}
-                    color="secondary"
+                    color="primary"
                     size="small"
                     onClick={() => handleBetChoice(event.eventId)}
                   >
