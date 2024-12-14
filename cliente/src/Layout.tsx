@@ -19,11 +19,13 @@ import web3Utils from './web3/web3Utils';
 import { Link, Outlet } from 'react-router-dom';
 import { Wallet } from '@mui/icons-material';
 import { useAccount } from './contexts/AccountContext';
+import { useBalanceTrigger } from './contexts/TriggerBalance';
 
 function Layout() {
   const { account, setAccount } = useAccount();
   const [accounts, setAccounts] = useState<string[]>([]);
   const [balanceEth, setBalanceEth] = useState<string>('');
+  const { triggerUpdate } = useBalanceTrigger();
 
   useEffect(() => {
     const getBalance = async () => {
@@ -38,7 +40,7 @@ function Layout() {
     if (account) {
       void getBalance();
     }
-  }, [account]); // Dependência account para executar sempre que account mudar
+  }, [account, triggerUpdate]); // Dependência account para executar sempre que account mudar
 
   useEffect(() => {
     const getAccounts = async () => {

@@ -14,6 +14,8 @@ import CoinFlipModal from './CoinFlipModal';
 import { useState } from 'react';
 import { useAccount } from '../contexts/AccountContext';
 import CreateModal from './CreateModal';
+import { useBalanceTrigger } from '../contexts/TriggerBalance';
+import { useEventsTrigger } from '../contexts/TriggerEvents';
 
 interface GridEventsProps {
   eventsData: { events: OpenEvent[] };
@@ -24,10 +26,15 @@ function GridEvents({ eventsData }: GridEventsProps) {
 
   const [openModalChoice, setOpenModalChoice] = useState<boolean>(false);
   const [openModalCreate, setOpenModalCreate] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [selectedEvent, setSelectedEvent] = useState<OpenEvent>(
+    {} as OpenEvent
+  );
 
-  const handleBetChoice = (eventId: string) => {
-    setSelectedEventId(eventId);
+  const { triggerUpdate } = useBalanceTrigger();
+  const { eventsTriggerUpdate } = useEventsTrigger();
+
+  const handleBetChoice = (event: OpenEvent) => {
+    setSelectedEvent(event);
     setOpenModalChoice(!openModalChoice);
   };
 
@@ -48,7 +55,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
 
   const handleBetConfirm = (betChoice: number, value: string) => {
     void web3Utils
-      .betEvent(selectedEventId, betChoice, value, account)
+      .betEvent(selectedEvent.eventId, betChoice, value, account)
       .then((res) => {
         if (res instanceof Error) {
           setSnackbar({
@@ -56,12 +63,15 @@ function GridEvents({ eventsData }: GridEventsProps) {
             message: res.message,
             severity: 'error',
           });
+        } else {
+          setSnackbar({
+            open: true,
+            message: res.message,
+            severity: 'success',
+          });
+          triggerUpdate();
+          eventsTriggerUpdate();
         }
-        setSnackbar({
-          open: true,
-          message: res.message,
-          severity: 'success',
-        });
       });
   };
 
@@ -79,6 +89,8 @@ function GridEvents({ eventsData }: GridEventsProps) {
           message: res.message,
           severity: 'success',
         });
+        triggerUpdate();
+        eventsTriggerUpdate();
       }
     });
   };
@@ -99,6 +111,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
         onClose={() => setOpenModalCreate(!openModalCreate)}
       />
       <CoinFlipModal
+        title={selectedEvent.name}
         open={openModalChoice}
         onClose={() => setOpenModalChoice(!openModalChoice)}
         onConfirm={(betChoice: number, value: string) => {
@@ -137,9 +150,9 @@ function GridEvents({ eventsData }: GridEventsProps) {
                   <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
                     {event.closed
                       ? event.result === '1'
-                        ? 'Resultado: Cara'
-                        : 'Resultado: Coroa'
-                      : 'Cara ou Coroa'}
+                        ? 'Resultado: A favor'
+                        : 'Resultado: Contra'
+                      : 'A favor ou Contra'}
                   </Typography>
                   <Typography
                     sx={{
@@ -150,7 +163,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Total Cara: {event.totalFor} ETH
+                    Total A favor: {event.totalFor} ETH
                   </Typography>
                   <Typography
                     sx={{
@@ -161,7 +174,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Total Coroa: {event.totalAgainst} ETH
+                    Total Contra: {event.totalAgainst} ETH
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'flex-end', gap: 2 }}>
@@ -177,7 +190,7 @@ function GridEvents({ eventsData }: GridEventsProps) {
                     disabled={event.closed}
                     color="primary"
                     size="small"
-                    onClick={() => handleBetChoice(event.eventId)}
+                    onClick={() => handleBetChoice(event)}
                   >
                     Apostar
                   </Button>

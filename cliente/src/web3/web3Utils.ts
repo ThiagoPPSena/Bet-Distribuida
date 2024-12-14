@@ -20,8 +20,11 @@ interface ContractExecutionError extends Error {
 function captureRevertMessage(error: unknown): string {
   if (error instanceof Error) {
     const contractError = error as ContractExecutionError;
-    const revertMessageMatch =
-      contractError.cause?.message.match(/revert (.*)/);
+    const messageError = contractError.cause?.message;
+    if (messageError === 'insufficient funds for gas * price + value') {
+      return 'Saldo insuficiente';
+    }
+    const revertMessageMatch = messageError?.match(/revert (.*)/);
     const revertMessage = revertMessageMatch
       ? revertMessageMatch[1]
       : 'Erro desconhecido';

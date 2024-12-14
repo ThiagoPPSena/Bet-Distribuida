@@ -10,7 +10,9 @@ interface AccountContextType {
 const AccountContext = createContext<AccountContextType | undefined>(undefined);
 
 // Provedor do contexto
-export const AccountProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AccountProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [account, setAccount] = useState<string>('');
 
   return (
@@ -21,6 +23,7 @@ export const AccountProvider: React.FC<{ children: ReactNode }> = ({ children })
 };
 
 // Hook para usar o contexto de conta
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAccount = (): AccountContextType => {
   const context = useContext(AccountContext);
   if (!context) {
